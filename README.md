@@ -11,7 +11,7 @@
 
 #### 项目使用
 
-git clone https://github.com/wylycool/flying
+git clone https://github.com/wylycool/flying.git
 
 需要安装mongodb和redis
 同时邮箱需要设置smtp服务器和账号授权码
