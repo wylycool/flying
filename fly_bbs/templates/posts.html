@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ title or '首页' }}-{{ get_option('title').val or 'flying' }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="keywords" content="{{ get_option('keywords').val }}">
+  <meta name="description" content="{{ get_option('description').val }}">
+<link rel="shortcut icon" type="image/x-icon" href="{{ url_for("static",filename="images/favicon.png") }}" />
+  <link rel="stylesheet" href="../static/layui/css/layui.css">
+  <link rel="stylesheet" href="../static/css/global.css">
+
+</head>
+<body>
+
+<div class="fly-header layui-bg-black">
+  <div class="layui-container">
+    <a class="fly-logo" href="/">
+      <img src="{{ get_option('logo').val or '/static/images/logo.png' }}" alt="layui">
+    </a>
+    <ul class="layui-nav fly-nav layui-hide-xs">
+      {% for item in get_list('pages', sort_by=('sort', -1)) %}
+        <li class="layui-nav-item layui-this">
+          <a href="{{ item.url }}">{{ item.name }} <i class="layui-icon">{{ item.icon_code|safe }}</i>  </a>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <ul class="layui-nav fly-nav-user">
+
+      {% if current_user.is_authenticated %}
+
+        <li class="layui-nav-item">
+          <a class="fly-nav-avatar" href="javascript:;">
+
+            <cite class="layui-hide-xs">{{ current_user.user.username }}</cite>
+            {% if current_user.user.renzheng %}
+              <i class="iconfont icon-renzheng" title="{{ current_user.user.renzheng }}"></i>
+            {% endif %}
+            {% if current_user.user.get('vip', 0) > 0 %}
+              <i class="layui-badge fly-badge-vip">VIP{{ current_user.user.vip }}</i>
+            {% endif %}
+            <img src="{{ current_user.user.avatar }}">
+          </a>
+          <dl class="layui-nav-child">
+            <dd><a href="{{ url_for('user.user_set') }}"><i class="layui-icon">&#xe620;</i>基本设置</a></dd>
+            <dd><a href="{{ url_for('user.user_message') }}"><i class="iconfont icon-tongzhi" style="top: 4px;"></i>我的消息</a></dd>
+            <dd><a href="{{ url_for('user.user_home', user_id=current_user.user._id) }}"><i class="layui-icon" style="margin-left: 2px; font-size: 22px;">&#xe68e;</i>我的主页</a>
+            </dd>
+            <hr style="margin: 5px 0;">
+            <dd><a href="{{ url_for('user.logout') }}" style="text-align: center;">退出</a></dd>
+          </dl>
+        </li>
+        {% if current_user.user.get('unread', 0) > 0 %}
+          <li class="layui-nav-item">
+          <a href="{{ url_for('user.user_message') }}"><span class="layui-badge">{{ current_user.user.unread }}</span></a>
+        </li>
+        {% endif %}
+      {% else %}
+        {% if get_option('open_user').val == '1' %}
+          <li class="layui-nav-item">
+            <a class="iconfont icon-touxiang layui-hide-xs" href="{{ url_for('user.login') }}"></a>
+          </li>
+          <li class="layui-nav-item">
+            <a href="{{ url_for('user.login') }}">登录</a>
+          </li>
+          <li class="layui-nav-item">
+            <a href="{{ url_for('user.register') }}">注册</a>
+          </li>
+          {#        <li class="layui-nav-item layui-hide-xs">#}
+          {#          <a href="/app/qq/" onclick="layer.msg('正在通过QQ登入', {icon:16, shade: 0.1, time:0})" title="QQ登入"#}
+          {#             class="iconfont icon-qq"></a>#}
+          {#        </li>#}
+          {#        <li class="layui-nav-item layui-hide-xs">#}
+          {#          <a href="/app/weibo/" onclick="layer.msg('正在通过微博登入', {icon:16, shade: 0.1, time:0})" title="微博登入"#}
+          {#             class="iconfont icon-weibo"></a>#}
+          {#        </li>#}
+        {% endif %}
+      {% endif %}
+    </ul>
+  </div>
+</div>
+<div class="layui-carousel" id="test1">
+  <div carousel-item>
+    <div><img src="../static/images/timg.jpg"></div>
+    <div><img src="../static/images/timg1.jpg"></div>
+    <div><img src="../static/images/timg2.jpg"></div>
+    <div><img src="../static/images/timg3.jpg"></div>
+    <div><img src="../static/images/timg2.jpg"></div>
+  </div>
+</div>
+  <div class="fly-panel fly-column">
+
+    <div class="layui-container">
+      <ul class="layui-clear">
+        <li class="layui-hide-xs {{ 'layui-this' if is_index }}"><a href="/">综合</a></li>
+        {% for item in get_list('catalogs', sort_by=('sort_key', 1)) %}
+          <li class="layui-hide-xs {{ 'layui-this' if catalog_id == item._id }}"><a
+                  href="/catalog/{{ item._id }}">{{ item.name }}</a></li>
+        {% endfor %}
+
+        <li class="layui-hide-xs layui-hide-sm layui-show-md-inline-block"><span class="fly-mid"></span></li>
+        {% if current_user.is_authenticated %}
+          <li class="layui-hide-xs layui-hide-sm layui-show-md-inline-block"><a href="{{ url_for('user.user_posts') }}">我发表的贴</a></li>
+          <li class="layui-hide-xs layui-hide-sm layui-show-md-inline-block"><a
+                  href="{{ url_for('user.user_posts') + '#collection' }}">我收藏的贴</a></li>
+        {% endif %}
+
+      </ul>
+
+      <div class="fly-column-right layui-hide-xs">
+        <span class="fly-search"><i class="layui-icon"></i></span>
+        <a href="{{ url_for('index.add') }}" class="layui-btn">发表新帖</a>
+      </div>
+      <div class="layui-hide-sm layui-show-xs-block"
+           style="margin-top: -10px; padding-bottom: 10px; text-align: center;">
+        <a href="{{ url_for('index.add') }}" class="layui-btn">发表新帖</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="layui-container">
+    <div class="layui-row layui-col-space15">
+
+        {% block content %}
+        {% endblock %}
+      <div class="layui-col-md4">
+
+        {% if is_index %}
+          <div class="fly-panel">
+            <h3 class="fly-panel-title">温馨通道</h3>
+            <ul class="fly-panel-main fly-list-static">
+              {% for item in get_list('passageways', sort_by=('sort', -1)) %}
+                <li>
+                <a href="{{ item.url }}" target="_blank">{{ item.name }}</a>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+
+            {% if current_user.is_authenticated %}
+                <div class="fly-panel fly-signin">
+                    <div class="fly-panel-title">
+                        签到
+                        <i class="fly-mid"></i>
+                        <a href="javascript:;" class="fly-link" id="LAY_signinHelp">说明</a>
+                    </div>
+                    <div class="fly-panel-main fly-signin-main">
+
+                    </div>
+                </div>
+            {% endif %}
+
+
+          <div class="fly-panel fly-rank fly-rank-reply" id="LAY_replyRank">
+            <h3 class="fly-panel-title">回贴榜</h3>
+            <dl>
+              <!--<i class="layui-icon fly-loading">&#xe63d;</i>-->
+              {% for item in get_list('users', sort_by=('reply_count',-1), size=12) %}
+                <dd>
+                  <a href="/user/{{ item._id }}">
+                    <img src="{{ item.avatar }}"><cite>{{ item.username }}</cite><i>{{ item.get('reply_count', 0) }}次回答</i>
+                  </a>
+                </dd>
+              {% else %}
+                <div class="fly-none">没有相关数据</div>
+              {% endfor %}
+            </dl>
+          </div>
+        {% endif %}
+
+
+        <dl class="fly-panel fly-list-one">
+          <dt class="fly-panel-title">本周热议</dt>
+          {% for item in get_list('posts', sort_by=('comment_count',-1), size=10, filter1={'create_at':{'$gte': date_cal(now(), 7, False)}}) %}
+            <dd>
+              <a href="/post/{{ item._id }}">{{ item.title }}</a>
+              <span><i class="iconfont icon-pinglun1"></i> {{ item.get('comment_count', 0) }}</span>
+            </dd>
+          {% else %}
+            <div class="fly-none">没有相关数据</div>
+          {% endfor %}
+        </dl>
+
+        <div class="fly-panel">
+          <div class="fly-panel-title">
+            友情赞助
+          </div>
+          <div class="fly-panel-main">
+            {% for item in get_list('ads', sort_by=('sort', -1)) %}
+              <a href="{{ item.url }}" target="_blank" class="fly-zanzhu" style="background-color: {{ item.color|safe or '#5FB878' }};">{{ item.name }}</a>
+            {% endfor %}
+
+          </div>
+        </div>
+
+        <div class="fly-panel fly-link">
+          <h3 class="fly-panel-title">友情链接</h3>
+          <dl class="fly-panel-main">
+            {% for item in get_list('friend_links', sort_by=('sort', -1)) %}
+              <dd><a href="{{ item.url }}" target="_blank">{{ item.name }}</a></dd>
+            {% endfor %}
+            <dd><a href="mailto:{{ get_option('email').val }}?subject=%E7%94%B3%E8%AF%B7Fly%E7%A4%BE%E5%8C%BA%E5%8F%8B%E9%93%BE"
+                   class="fly-link">申请友链</a>
+            <dd>
+          </dl>
+        </div>
+
+      </div>
+    </div>
+  </div>
+<div class="fly-footer">
+  <p>{{ get_option('footer').val|safe or 'Power by flying' }}</p>
+  <p>
+    {% for item in get_list('footer_links', sort_by=('sort', -1)) %}
+      <a href="{{ item.url }}" target="_blank">{{ item.name }}</a>
+    {% endfor %}
+  </p>
+</div>
+
+<script src="../static/layui/layui.js"></script>
+
+<script>
+    layui.cache.page = '{{ page_name if page_name else '' }}';
+    layui.cache.user = {
+        username: '{{ current_user.user['username'] if current_user.is_authenticated else '游客'}}'
+        , uid: '{{ current_user.user['_id'] if current_user.is_authenticated }}'
+        , avatar: '{{ current_user.user['avatar'] if current_user.is_authenticated}}'
+        , experience: '{{ current_user.user['coin'] if current_user.is_authenticated else '0'}}'
+        , sex: '{{ current_user.user.get('sex', '未知') if current_user.is_authenticated else '未知'}}'
+    };
+    layui.config({
+        version: "3.0.0"
+        , base: '/static/mods/' //这里实际使用时，建议改成绝对路径
+    }).extend({
+        fly: 'index'
+    }){% block fly_use %}.use('fly');{% endblock %}
+</script>
+<script src="../static/layui/layui.js"></script>
+<script>
+layui.use('carousel', function(){
+  var carousel = layui.carousel;
+  //建造实例
+  carousel.render({
+    elem: '#test1'
+    ,width: '100%' //设置容器宽度
+    ,arrow: 'always' //始终显示箭头
+    //,anim: 'updown' //切换动画方式
+  });
+});
+</script>
+
+</body>
+</html>
